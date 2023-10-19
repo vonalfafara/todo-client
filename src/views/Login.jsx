@@ -40,15 +40,21 @@ const Login = () => {
       });
       setWrongCreds(false);
       if (error.response.status === 422) {
+        const findErrors = Object.keys(error.response.data.errors).reduce(
+          (a, key) => {
+            return {
+              ...a,
+              [key]: {
+                content: error.response.data.errors[key][0],
+                pointing: "below",
+              },
+            };
+          },
+          {}
+        );
         setErrors({
-          username: {
-            content: error.response.data.errors.username[0],
-            pointing: "below",
-          },
-          password: {
-            content: error.response.data.errors.password[0],
-            pointing: "below",
-          },
+          username: findErrors.username || false,
+          password: findErrors.password || false,
         });
       }
       if (error.response.status === 403) {

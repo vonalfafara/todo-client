@@ -44,19 +44,22 @@ const Register = () => {
         password: false,
       });
       if (error.response.status === 422) {
+        const findErrors = Object.keys(error.response.data.errors).reduce(
+          (a, key) => {
+            return {
+              ...a,
+              [key]: {
+                content: error.response.data.errors[key][0],
+                pointing: "below",
+              },
+            };
+          },
+          {}
+        );
         setErrors({
-          username: {
-            content: error.response.data.errors?.username[0],
-            pointing: "below",
-          },
-          email: {
-            content: error.response.data.errors?.email[0],
-            pointing: "below",
-          },
-          password: {
-            content: error.response.data.errors?.password[0],
-            pointing: "below",
-          },
+          username: findErrors.username || false,
+          email: findErrors.email || false,
+          password: findErrors.password || false,
         });
       }
       if (error.response.status === 403) {
@@ -98,7 +101,6 @@ const Register = () => {
                   label="Confirm Password"
                   type="password"
                   onChange={(e) => setPasswordConfirmation(e.target.value)}
-                  error={errors.password}
                 />
               </Form>
             </Card.Content>

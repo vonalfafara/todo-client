@@ -26,6 +26,9 @@ const Home = () => {
   const [errors, setErrors] = useState({
     name: false,
   });
+  const [errorsModal, setErrorsModal] = useState({
+    name: false,
+  });
   const todosRef = useRef(null);
 
   useEffect(() => {
@@ -60,13 +63,23 @@ const Home = () => {
       const response = await api.post("/todos", body);
       setNotification(response.data.message);
       setShowNotification(true);
+      setErrors({
+        name: false,
+      });
       const notificationTimeout = setTimeout(() => {
         setShowNotification(false);
         clearTimeout(notificationTimeout);
       }, 5000);
       getTodos();
     } catch (error) {
-      console.log(error);
+      if (error.response.status === 422) {
+        setErrors({
+          name: {
+            content: error.response.data.errors?.name[0],
+            pointing: "below",
+          },
+        });
+      }
     }
   }
 
@@ -79,19 +92,24 @@ const Home = () => {
       getTodos(page);
       setNotification(response.data.message);
       setShowNotification(true);
+      setErrorsModal({
+        name: false,
+      });
       const notificationTimeout = setTimeout(() => {
         setShowNotification(false);
         clearTimeout(notificationTimeout);
       }, 5000);
+      return true;
     } catch (error) {
       if (error.response.status === 422) {
-        setErrors({
+        setErrorsModal({
           name: {
             content: error.response.data.errors.name[0],
             pointing: "below",
           },
         });
       }
+      return false;
     }
   }
 
@@ -109,7 +127,6 @@ const Home = () => {
         clearTimeout(notificationTimeout);
       }, 5000);
     } catch (error) {
-      console.log(error);
       if (error.response.status === 422) {
         setErrors({
           name: {
@@ -137,6 +154,7 @@ const Home = () => {
             update={updateTodo}
             destory={deleteTodo}
             statuses={statuses}
+            errors={errorsModal}
           />
         </Grid.Row>
         <Grid.Row>

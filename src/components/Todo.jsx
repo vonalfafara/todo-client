@@ -13,21 +13,21 @@ import {
 } from "semantic-ui-react";
 import { useState } from "react";
 
-const Todo = ({ todo, update, destory, statuses }) => {
+const Todo = ({ todo, update, destory, statuses, errors }) => {
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [name, setName] = useState(todo.name);
-  const [description, setDescription] = useState(todo.description);
+  const [description, setDescription] = useState(todo.description || "");
   const [status_id, setStatus] = useState(todo.status.id);
 
-  function updateTodo() {
+  async function updateTodo() {
     const body = {
       name,
       description,
       status_id,
     };
-    update(todo.id, body);
-    setOpenUpdate(false);
+    const response = await update(todo.id, body);
+    setOpenUpdate(!response);
   }
 
   function deleteTodo() {
@@ -76,6 +76,7 @@ const Todo = ({ todo, update, destory, statuses }) => {
                 label="What do you need to do?"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                error={errors.name}
               />
               <Form.Field
                 control={TextArea}
